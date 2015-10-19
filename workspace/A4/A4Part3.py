@@ -82,4 +82,8 @@ def computeEngEnv(inputFile, window, M, N, H):
     """
     
     ### your code here
+    fs, x = UF.wavread(inputFile)
+    w = get_window(window, M)
+    xmX,xpX = stft.stftAnal(x,fs,w,N,H)
     
+    return xmX
