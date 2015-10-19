@@ -57,8 +57,53 @@ def extractMainLobe(window, M):
             The function should return a numpy array containing the main lobe of the magnitude 
             spectrum of the window in decibels (dB).
     """
-
-    w = get_window(window, M)         # get the window 
-    
     ### Your code here
+    w = get_window(window, M)         # get the window 
+    hM1 = int(math.floor(M+1)/2)
+    hM2 = int(math.floor(M/2))
+
+    N = 8 * M
+    hN = N/2
+    fftbuffer = np.zeros(N)
+    fftbuffer[:hM1] = w[hM2:]
+    fftbuffer[N-hM2:] = w[:hM2]
+
+    X = fft(fftbuffer)
+    absX = abs(X)
+    absX[absX < eps] = eps
+    mX = 20 * np.log10(absX)
+
+    mX1 = np.zeros(N)
+    mX1[:hN] = mX[hN:]
+    mX1[N-hN:] = mX[:hN]
+
+    # find local minimum across main lobe
+    lmX1 = mX1[:hN]
+    rmX1 = mX1[hN:]
+    
+    outlmX = []
+    outrmX = []
+    for i in reversed(lmX1):
+        if not outlmX:
+	    outlmX.append(i)
+        else:
+	    if i < outlmX[-1]:
+                outlmX.append(i)
+            else:
+                break
+
+
+    for j in rmX1:
+	if not outrmX:
+            outrmX.append(j)
+        else:
+            if j < outrmX[-1]:
+                outrmX.append(j)
+            else:
+                break
+    
+    return np.array(outlmX[::-1] + outrmX)
+    
+    
+
     
