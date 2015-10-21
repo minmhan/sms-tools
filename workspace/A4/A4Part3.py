@@ -86,4 +86,26 @@ def computeEngEnv(inputFile, window, M, N, H):
     w = get_window(window, M)
     xmX,xpX = stft.stftAnal(x,fs,w,N,H)
     
-    return xmX
+    ldx0 = 1
+    ldx1 = ((3000*N)/fs) + 1
+    hdx0 = ldx1
+    hdx1 = ((10000*N)/fs) + 1
+
+    sz = np.size(xmX[:,0])
+    low_band = np.zeros(sz)
+    high_band = np.zeros(sz)
+    for i in np.arange(sz):
+        #tmp = np.power(10,xmX[i,1:278]/20.0)
+        tmp = np.power(10,xmX[i,ldx0:ldx1]/20.0)
+        tmp[tmp < eps] = eps
+        low_band[i] = 10 * np.log10(np.dot(tmp,tmp))
+        #low_band[i] = 10.0 * np.log10(np.sum(np.square(np.power(10, (xmX[i, 1: 140] / 20.0)))))
+
+        #tmp1 = np.power(10,xmX[i,279:928]/20.0)
+	tmp1 = np.power(10,xmX[i,hdx0:hdx1]/20.0)
+        tmp1[tmp1 < eps] = eps
+        high_band[i] = 10 * np.log10(np.dot(tmp1,tmp1))
+
+    return np.transpose(np.array([low_band,high_band]))
+
+
